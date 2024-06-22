@@ -1,0 +1,40 @@
+local manager = require("scripts.manager")
+
+local WIDTH = tonumber(sys.get_config("display.width"))
+local HEIGHT = tonumber(sys.get_config("display.height"))
+
+local function random_pos()
+	return vmath.vector3(math.random(WIDTH), math.random(HEIGHT), math.random(-99, 99) / 100)
+end
+
+local function hex2rgba(hex, w)
+	local alpha = 1
+	if w then
+		alpha = w
+	end
+	hex = hex:gsub("#", "")
+	local rgba =
+		vmath.vector4(
+		tonumber("0x" .. hex:sub(1, 2)) / 255,
+		tonumber("0x" .. hex:sub(3, 4)) / 255,
+		tonumber("0x" .. hex:sub(5, 6)) / 255,
+		alpha
+	)
+	return rgba
+end
+
+function init(self)
+	msg.post("@render:", "clear_color", {color = hex2rgba("#a1b8ff")})
+	math.randomseed(socket.gettime())
+
+	manager.collision_group = aabb.new_group()
+	manager.ids = {}
+	manager.dragging = false
+	manager.cursor_pos = vmath.vector3()
+
+	for i=1,200 do
+		local obj_prop = {num = i}
+		local pos = random_pos()
+		factory.create("#chip", pos, nil, obj_prop)
+	end
+end

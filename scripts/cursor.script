@@ -1,0 +1,27 @@
+local manager = require("scripts.manager")
+
+local function check_collisions(self,x,y)
+	self.result, self.count = aabb.query(manager.collision_group, x, y, 1, 1)
+end
+
+function init(self)
+	self.result = {}
+	self.count = 0
+	msg.post(".", "acquire_input_focus")
+	manager.cursor_pos = go.get_position()
+end
+
+function on_input(self, action_id, action)
+	check_collisions(self,action.x,action.y)
+	manager.cursor_pos = vmath.vector3(action.x, action.y, 1)
+	if action.pressed and action_id == hash("touch") then
+		if self.result then
+			for _,aabb_id in ipairs(self.result) do
+				manager.select(aabb_id)
+				break
+			end
+		end
+	elseif action.released and action_id == hash("touch") then
+		manager.deselect()
+	end
+end
